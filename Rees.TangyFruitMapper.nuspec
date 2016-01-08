@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Rees.TangyFruitMapper</id>
+    <version>1.0.0</version>
+    <authors>Ben Rees (Benrnz)</authors>
+    <owners>Ben</owners>
+    <licenseUrl>https://github.com/Benrnz/TangyFruitMapper/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/Benrnz/TangyFruitMapper</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>A convention based and old school 'solve it with plain code' approach to mapping a Model object to a Dto object using code generation.</description>
+    <releaseNotes>Initial Release</releaseNotes>
+    <copyright>Copyright 2016</copyright>
+    <tags>DTO Mapper Mapping</tags>
+  </metadata>
+  <files>
+      <file src="\bin\Release\Rees.TangyFruitMapper.dll" target="lib\portable-windows8+net46" />
+      <file src="\bin\Release\Rees.TangyFruitMapper.pdb" target="lib\portable-windows8+net46" />
+  </files>
+
+</package>

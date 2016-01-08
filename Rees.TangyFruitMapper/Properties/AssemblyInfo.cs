@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 
 [assembly: AssemblyTitle("Rees.TangyFruitMapper")]
-[assembly: AssemblyDescription("A convention based code generation approach to mapping and copying data to and from DTO types.")]
+[assembly: AssemblyDescription("A simple convention based code generation approach to mapping and copying data to and from DTO types.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Rees.biz")]
 [assembly: AssemblyProduct("Rees.TangyFruitMapper")]
