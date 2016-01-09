@@ -2,6 +2,7 @@
 <package >
   <metadata>
     <id>Rees.TangyFruitMapper</id>
+	<title>Tangy Fruit Mapper for C# code</title>
     <version>1.0.0</version>
     <authors>Ben Rees (Benrnz)</authors>
     <owners>Ben</owners>
@@ -14,8 +15,8 @@
     <tags>DTO Mapper Mapping</tags>
   </metadata>
   <files>
-      <file src="\bin\Release\Rees.TangyFruitMapper.dll" target="lib\portable-windows8+net46" />
-      <file src="\bin\Release\Rees.TangyFruitMapper.pdb" target="lib\portable-windows8+net46" />
+      <file src="\bin\Release\Rees.TangyFruitMapper.dll" target="lib\portable-win+net45" />
+      <file src="\bin\Release\Rees.TangyFruitMapper.pdb" target="lib\portable-win+net45" />
   </files>
 
 </package>
