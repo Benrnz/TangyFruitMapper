@@ -1,4 +1,6 @@
 # TangyFruitMapper
+![Tangy Fruit Image](https://github.com/Benrnz/TangyFruitMapper/blob/master/Rees.TangyFruitMapper/TangyFruit.png)
+
 An simple, old school solve it with plain code approach to mapping a Model object to a Dto object using code generation.
 
 ##Overview
