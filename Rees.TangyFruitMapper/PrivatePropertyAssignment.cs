@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Rees.TangyFruitMapper
+﻿namespace Rees.TangyFruitMapper
 {
     internal class PrivatePropertyAssignment : AssignDestinationStrategy
     {

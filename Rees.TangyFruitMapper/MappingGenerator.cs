@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using JetBrains.Annotations;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace Rees.TangyFruitMapper
 {
@@ -8,18 +6,18 @@ namespace Rees.TangyFruitMapper
     ///     A Convention based C# code generator for mapping a model object to a DTO object and back.
     ///     This class is designed to be used either with T4, console application, or a unit test.
     /// </summary>
-    public class MappingGenerator
+    public class MappingGenerator<TDto, TModel>
     {
-        private Action<string> codeOutput;
-        private Type dtoType;
-        private int indent;
-        private Type modelType;
+        private Action<string> codeOutputDelegate;
         private NamespaceFinder namespaceFinder;
+        private Type dtoType;
+        private Type modelType;
+        private int indent;
 
         /// <summary>
         ///     An optional delegate to a logging action to output diagnostic messages for debugging and troubleshooting purposes.
         /// </summary>
-        public Action<string> DiagnosticLogging { get; set; }
+        public Action<string> DiagnosticLogging { get; set; } = x => { };
 
         /// <summary>
         ///     Gets or sets a value indicating whether generated code will be emitted as internal classes.
@@ -31,6 +29,14 @@ namespace Rees.TangyFruitMapper
         /// </summary>
         public string Namespace { get; set; } = "GeneratedCode";
 
+        public MappingGenerator()
+        {
+            this.codeOutputDelegate = Console.WriteLine;
+            this.dtoType = typeof(TDto);
+            this.modelType = typeof(TModel);
+            this.namespaceFinder = new NamespaceFinder(this.dtoType, this.modelType);
+        }
+
         /// <summary>
         ///     Generates the code for the specified types. Be sure to check for TODO's in the generated code.
         /// </summary>
@@ -39,15 +45,11 @@ namespace Rees.TangyFruitMapper
         /// <param name="codeOutputDelegate">An action to output the code.</param>
         /// <exception cref="ArgumentNullException">
         /// </exception>
-        public void Generate<TDto, TModel>([NotNull] Action<string> codeOutputDelegate)
+        public void Generate([NotNull] Action<string> codeOutputDelegate)
         {
             if (codeOutputDelegate == null) throw new ArgumentNullException(nameof(codeOutputDelegate));
-            if (DiagnosticLogging == null) DiagnosticLogging = x => { };
 
-            this.codeOutput = codeOutputDelegate;
-            this.modelType = typeof(TModel);
-            this.dtoType = typeof(TDto);
-            this.namespaceFinder = new NamespaceFinder(this.dtoType, this.modelType);
+            this.codeOutputDelegate = codeOutputDelegate;
             DiagnosticLogging($"Starting to generate code for mapping {this.dtoType.Name} to {this.modelType.Name}...");
 
             MapByProperties.ClearMapCache();
@@ -78,14 +80,14 @@ namespace Rees.TangyFruitMapper
 
         private void WriteClassFooter()
         {
-            this.codeOutput($@"{Outdent()}}} // End Class
+            this.codeOutputDelegate($@"{Outdent()}}} // End Class
 ");
         }
 
         private void WriteClassHeader(MapResult map)
         {
             var classAccessor = EmitWithInternalAccessors ? "internal" : "public";
-            this.codeOutput(
+            this.codeOutputDelegate(
                 $@"{Indent()}[GeneratedCode(""1.0"", ""Tangy Fruit Mapper {DateTime.UtcNow} UTC"")]
 {Indent()}{classAccessor} partial class {map.MapperName} : IDtoMapper<{map.DtoType.Name}, {map.ModelType.Name}>
 {Indent()}{{
@@ -95,20 +97,20 @@ namespace Rees.TangyFruitMapper
 
         private void WriteFileFooter()
         {
-            this.codeOutput($@"{Outdent()}}} // End Namespace");
+            this.codeOutputDelegate($@"{Outdent()}}} // End Namespace");
         }
 
         private void WriteFileHeader()
         {
-            this.codeOutput($@"using System.CodeDom.Compiler;
+            this.codeOutputDelegate($@"using System.CodeDom.Compiler;
 using System.Linq;
 using System.Reflection;
 using Rees.TangyFruitMapper;");
             foreach (var ns in this.namespaceFinder.DiscoverNamespaces())
             {
-                this.codeOutput($@"using {ns.Key};");
+                this.codeOutputDelegate($@"using {ns.Key};");
             }
-            this.codeOutput($@"
+            this.codeOutputDelegate($@"
 namespace {Namespace}
 {{
 {Indent(true)}");
@@ -132,11 +134,11 @@ namespace {Namespace}
         private void WriteMethods(MapResult map)
         {
             // ToModel Method
-            this.codeOutput($@"{Indent()}public virtual {map.ModelType.Name} ToModel({map.DtoType.Name} {AssignmentStrategy.DtoVariableName})
+            this.codeOutputDelegate($@"{Indent()}public virtual {map.ModelType.Name} ToModel({map.DtoType.Name} {AssignmentStrategy.DtoVariableName})
 {Indent()}{{");
 
             // Construct Model
-            this.codeOutput($@"{Indent(true)}{map.ModelType.Name} {AssignmentStrategy.ModelVariableName} = null;
+            this.codeOutputDelegate($@"{Indent(true)}{map.ModelType.Name} {AssignmentStrategy.ModelVariableName} = null;
 {Indent()}ModelFactory({AssignmentStrategy.DtoVariableName}, ref {AssignmentStrategy.ModelVariableName});
 {Indent()}if ({AssignmentStrategy.ModelVariableName} == null) 
 {Indent()}{{
@@ -145,32 +147,32 @@ namespace {Namespace}
 {Indent()}var {AssignmentStrategy.ModelTypeVariableName} = {AssignmentStrategy.ModelVariableName}.GetType();");
 
             // Optional Pre-processing
-            this.codeOutput($"{Indent()}ToModelPreprocessing({AssignmentStrategy.DtoVariableName}, {AssignmentStrategy.ModelVariableName});");
+            this.codeOutputDelegate($"{Indent()}ToModelPreprocessing({AssignmentStrategy.DtoVariableName}, {AssignmentStrategy.ModelVariableName});");
 
             // Assign properties by convention if possible
             foreach (var assignment in map.ModelToDtoMap.Values)
             {
                 // model.Property = dto.Property;
-                this.codeOutput($"{Indent()}{assignment.Source.CreateCodeLine(DtoOrModel.Dto)}");
-                this.codeOutput($"{Indent()}{assignment.Destination.CreateCodeLine(DtoOrModel.Model, assignment.Source.SourceVariableName)}");
+                this.codeOutputDelegate($"{Indent()}{assignment.Source.CreateCodeLine(DtoOrModel.Dto)}");
+                this.codeOutputDelegate($"{Indent()}{assignment.Destination.CreateCodeLine(DtoOrModel.Model, assignment.Source.SourceVariableName)}");
             }
             if (!map.ModelToDtoMap.Any())
             {
-                this.codeOutput($"{Indent()} // TODO No properties found to map.");
+                this.codeOutputDelegate($"{Indent()} // TODO No properties found to map.");
             }
 
             // Optional Post-processing
-            this.codeOutput($@"{Indent()}ToModelPostprocessing({AssignmentStrategy.DtoVariableName}, ref {AssignmentStrategy.ModelVariableName});");
-            this.codeOutput($@"{Indent()}return {AssignmentStrategy.ModelVariableName};
+            this.codeOutputDelegate($@"{Indent()}ToModelPostprocessing({AssignmentStrategy.DtoVariableName}, ref {AssignmentStrategy.ModelVariableName});");
+            this.codeOutputDelegate($@"{Indent()}return {AssignmentStrategy.ModelVariableName};
 {Outdent()}}} // End ToModel Method");
 
 
             // ToDto Method
-            this.codeOutput($@"{Indent()}public virtual {map.DtoType.Name} ToDto({map.ModelType.Name} {AssignmentStrategy.ModelVariableName})
+            this.codeOutputDelegate($@"{Indent()}public virtual {map.DtoType.Name} ToDto({map.ModelType.Name} {AssignmentStrategy.ModelVariableName})
 {Indent()}{{");
 
             // Construct Dto
-            this.codeOutput($@"{Indent(true)}{map.DtoType.Name} {AssignmentStrategy.DtoVariableName} = null;
+            this.codeOutputDelegate($@"{Indent(true)}{map.DtoType.Name} {AssignmentStrategy.DtoVariableName} = null;
 {Indent()}DtoFactory(ref {AssignmentStrategy.DtoVariableName}, {AssignmentStrategy.ModelVariableName});
 {Indent()}if ({AssignmentStrategy.DtoVariableName} == null) 
 {Indent()}{{
@@ -178,27 +180,27 @@ namespace {Namespace}
 {Outdent()}}}");
 
             // Optional Pre-processing
-            this.codeOutput($@"{Indent()}ToDtoPreprocessing({AssignmentStrategy.DtoVariableName}, {AssignmentStrategy.ModelVariableName});");
+            this.codeOutputDelegate($@"{Indent()}ToDtoPreprocessing({AssignmentStrategy.DtoVariableName}, {AssignmentStrategy.ModelVariableName});");
 
             // Assign properties by convention if possible
             foreach (var assignment in map.DtoToModelMap.Values)
             {
-                this.codeOutput($"{Indent()}{assignment.Source.CreateCodeLine(DtoOrModel.Model)}");
-                this.codeOutput($"{Indent()}{assignment.Destination.CreateCodeLine(DtoOrModel.Dto, assignment.Source.SourceVariableName)}");
+                this.codeOutputDelegate($"{Indent()}{assignment.Source.CreateCodeLine(DtoOrModel.Model)}");
+                this.codeOutputDelegate($"{Indent()}{assignment.Destination.CreateCodeLine(DtoOrModel.Dto, assignment.Source.SourceVariableName)}");
             }
 
             // Optional Post-processing
-            this.codeOutput($@"{Indent()}ToDtoPostprocessing(ref {AssignmentStrategy.DtoVariableName}, {AssignmentStrategy.ModelVariableName});");
-            this.codeOutput($@"{Indent()}return {AssignmentStrategy.DtoVariableName};
+            this.codeOutputDelegate($@"{Indent()}ToDtoPostprocessing(ref {AssignmentStrategy.DtoVariableName}, {AssignmentStrategy.ModelVariableName});");
+            this.codeOutputDelegate($@"{Indent()}return {AssignmentStrategy.DtoVariableName};
 {Outdent()}}} // End ToDto Method");
 
             // Partial Methods
-            this.codeOutput($@"{Indent()}partial void ToModelPreprocessing({map.DtoType.Name} {AssignmentStrategy.DtoVariableName}, {map.ModelType.Name} {AssignmentStrategy.ModelVariableName});");
-            this.codeOutput($@"{Indent()}partial void ToDtoPreprocessing({map.DtoType.Name} {AssignmentStrategy.DtoVariableName}, {map.ModelType.Name} {AssignmentStrategy.ModelVariableName});");
-            this.codeOutput($@"{Indent()}partial void ModelFactory({map.DtoType.Name} {AssignmentStrategy.DtoVariableName}, ref {map.ModelType.Name} {AssignmentStrategy.ModelVariableName});");
-            this.codeOutput($@"{Indent()}partial void DtoFactory(ref {map.DtoType.Name} {AssignmentStrategy.DtoVariableName}, {map.ModelType.Name} {AssignmentStrategy.ModelVariableName});");
-            this.codeOutput($@"{Indent()}partial void ToModelPostprocessing({map.DtoType.Name} {AssignmentStrategy.DtoVariableName}, ref {map.ModelType.Name} {AssignmentStrategy.ModelVariableName});");
-            this.codeOutput($@"{Indent()}partial void ToDtoPostprocessing(ref {map.DtoType.Name} {AssignmentStrategy.DtoVariableName}, {map.ModelType.Name} {AssignmentStrategy.ModelVariableName});");
+            this.codeOutputDelegate($@"{Indent()}partial void ToModelPreprocessing({map.DtoType.Name} {AssignmentStrategy.DtoVariableName}, {map.ModelType.Name} {AssignmentStrategy.ModelVariableName});");
+            this.codeOutputDelegate($@"{Indent()}partial void ToDtoPreprocessing({map.DtoType.Name} {AssignmentStrategy.DtoVariableName}, {map.ModelType.Name} {AssignmentStrategy.ModelVariableName});");
+            this.codeOutputDelegate($@"{Indent()}partial void ModelFactory({map.DtoType.Name} {AssignmentStrategy.DtoVariableName}, ref {map.ModelType.Name} {AssignmentStrategy.ModelVariableName});");
+            this.codeOutputDelegate($@"{Indent()}partial void DtoFactory(ref {map.DtoType.Name} {AssignmentStrategy.DtoVariableName}, {map.ModelType.Name} {AssignmentStrategy.ModelVariableName});");
+            this.codeOutputDelegate($@"{Indent()}partial void ToModelPostprocessing({map.DtoType.Name} {AssignmentStrategy.DtoVariableName}, ref {map.ModelType.Name} {AssignmentStrategy.ModelVariableName});");
+            this.codeOutputDelegate($@"{Indent()}partial void ToDtoPostprocessing(ref {map.DtoType.Name} {AssignmentStrategy.DtoVariableName}, {map.ModelType.Name} {AssignmentStrategy.ModelVariableName});");
         }
     }
 }

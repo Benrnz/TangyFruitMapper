@@ -1,5 +1,3 @@
-using System;
-
 namespace Rees.TangyFruitMapper
 {
     internal class NonpublicDefaultConstructor : ConstructionStrategy

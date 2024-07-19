@@ -2,13 +2,13 @@ namespace Rees.TangyFruitMapper
 {
     internal class CommentedFetchSource : FetchSourceStrategy
     {
-        private readonly string reason;
+        private readonly string? reason;
 
-        public CommentedFetchSource(string sourceName) : base(null, sourceName)
+        public CommentedFetchSource(string? sourceName) : base(null, sourceName)
         {
         }
 
-        public CommentedFetchSource(string sourceName, string reason) : base(null, sourceName)
+        public CommentedFetchSource(string? sourceName, string reason) : base(null, sourceName)
         {
             this.reason = reason;
         }

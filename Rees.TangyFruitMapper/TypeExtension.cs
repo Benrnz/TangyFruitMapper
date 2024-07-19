@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Linq;
+﻿using System.Collections;
 using System.Reflection;
 
 namespace Rees.TangyFruitMapper
@@ -24,7 +22,7 @@ namespace Rees.TangyFruitMapper
         {
             if (instance == null) return false;
 
-            if (instance.FullName.StartsWith("System.Nullable`1"))
+            if (instance.FullName == null || instance.FullName.StartsWith("System.Nullable`1"))
             {
                 return false;
             }

@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using JetBrains.Annotations;
 using Rees.TangyFruitMapper.Validation;
 
 namespace Rees.TangyFruitMapper
@@ -93,7 +91,7 @@ namespace Rees.TangyFruitMapper
             return null;
         }
 
-        private AssignDestinationStrategy CanDestinationBeAssignedUsingReflection(PropertyInfo modelProperty, Type destinationType)
+        private AssignDestinationStrategy? CanDestinationBeAssignedUsingReflection(PropertyInfo modelProperty, Type destinationType)
         {
             if (modelProperty.CanWrite && !modelProperty.SetMethod.IsPublic)
             {
@@ -140,17 +138,20 @@ namespace Rees.TangyFruitMapper
 
                 this.diagnosticLogger($"First pass to get source value for {this.dtoType.Name}.{dtoProperty.Name} from {this.modelType.Name} complete, using {assignmentStrategy.Source.GetType().Name}");
 
-                if (assignmentStrategy.Source.SourceType.IsCollection())
+                if (assignmentStrategy.Source.SourceType != null)
                 {
-                    // Collection detected
-                    MapCollection(assignmentStrategy, this.modelType, false);
-                    continue;
-                }
+                    if (assignmentStrategy.Source.SourceType.IsCollection())
+                    {
+                        // Collection detected
+                        MapCollection(assignmentStrategy, this.modelType, false);
+                        continue;
+                    }
 
-                if (assignmentStrategy.Source.SourceType.IsComplexType())
-                {
-                    // Nest objects detected - will need to attempt to map these as well.
-                    MapNestedObject(assignmentStrategy, this.modelType, false);
+                    if (assignmentStrategy.Source.SourceType.IsComplexType())
+                    {
+                        // Nest objects detected - will need to attempt to map these as well.
+                        MapNestedObject(assignmentStrategy, this.modelType, false);
+                    }
                 }
 
                 this.diagnosticLogger(
@@ -194,15 +195,18 @@ namespace Rees.TangyFruitMapper
                 this.diagnosticLogger(
                     $"First pass to get source value for {this.modelType.Name}.{modelProperty.Name} from {this.dtoType.Name} complete, using {assignmentStrategy.Source.GetType().Name}");
 
-                if (assignmentStrategy.Source.SourceType.IsCollection())
+                if (assignmentStrategy.Source.SourceType != null)
                 {
-                    MapCollection(assignmentStrategy, this.dtoType, true);
-                    continue;
-                }
+                    if (assignmentStrategy.Source.SourceType.IsCollection())
+                    {
+                        MapCollection(assignmentStrategy, this.dtoType, true);
+                        continue;
+                    }
 
-                if (assignmentStrategy.Source.SourceType.IsComplexType())
-                {
-                    MapNestedObject(assignmentStrategy, this.dtoType, true);
+                    if (assignmentStrategy.Source.SourceType.IsComplexType())
+                    {
+                        MapNestedObject(assignmentStrategy, this.dtoType, true);
+                    }
                 }
 
                 this.diagnosticLogger(
@@ -210,7 +214,7 @@ namespace Rees.TangyFruitMapper
             }
         }
 
-        private FetchSourceStrategy DoesSourceHaveFieldWithSimilarName(string targetPropertyName, Type assignmentSource)
+        private FetchSourceStrategy? DoesSourceHaveFieldWithSimilarName(string targetPropertyName, Type assignmentSource)
         {
             // Looking for a backing field with a similar name
             var sourceField = FindSimilarlyNamedField(targetPropertyName, assignmentSource);
@@ -222,7 +226,7 @@ namespace Rees.TangyFruitMapper
             return null;
         }
 
-        private FetchSourceStrategy DoesSourceHavePropertyWithSameName(string destinationName, Type assignmentSource)
+        private FetchSourceStrategy? DoesSourceHavePropertyWithSameName(string destinationName, Type assignmentSource)
         {
             var sourceProperty = FindMatchingSourceProperty(destinationName, assignmentSource);
             if (sourceProperty != null)
@@ -233,7 +237,7 @@ namespace Rees.TangyFruitMapper
             return null;
         }
 
-        private PropertyInfo FindMatchingSourceProperty(string destinationName, Type source)
+        private PropertyInfo? FindMatchingSourceProperty(string destinationName, Type source)
         {
             var sourceProperty = source.GetProperty(destinationName);
             if (sourceProperty != null)
@@ -256,7 +260,7 @@ namespace Rees.TangyFruitMapper
             return null;
         }
 
-        private static FieldInfo FindSimilarlyNamedField(string targetPropertyName, Type searchTarget)
+        private static FieldInfo? FindSimilarlyNamedField(string targetPropertyName, Type searchTarget)
         {
             var sourceField = searchTarget.GetField(targetPropertyName, BindingFlags.Instance | BindingFlags.NonPublic);
             if (sourceField == null)
@@ -280,7 +284,19 @@ namespace Rees.TangyFruitMapper
 
         private void MapCollection(AssignmentStrategy assignmentStrategy, Type parentType, bool sourceIsDto)
         {
-// Collection detected
+            if (assignmentStrategy.Source == null 
+                || assignmentStrategy.Source.SourceType == null 
+                || assignmentStrategy.Destination == null
+                || assignmentStrategy.Destination.DestinationType == null)
+            {
+                this.diagnosticLogger($"The source or destination property types are null. Commenting out the assignment.");
+                assignmentStrategy.Source = new CommentedFetchSource(assignmentStrategy.Source?.SourceName,
+                    "The source or destination property types are null.");
+                assignmentStrategy.Destination = new CommentedAssignment(assignmentStrategy.Destination?.AssignmentDestinationName,
+                    "The source or destination property types are null.");
+                return;
+            }
+            // Collection detected
             this.diagnosticLogger($"Collection detected: {parentType.Name}.{assignmentStrategy.Source.SourceType}. Examining collection...");
             if (assignmentStrategy.Source.SourceType.GetGenericArguments().Length != 1
                 || assignmentStrategy.Destination.DestinationType.GetGenericArguments().Length != 1)
@@ -339,9 +355,12 @@ namespace Rees.TangyFruitMapper
         private void MapNestedObject(AssignmentStrategy assignmentStrategy, Type parentType, bool sourceIsDto)
         {
             // Nest objects detected - will need to attempt to map these as well.
-            this.diagnosticLogger($"Nested object graph detected on model property: {parentType.Name}.{assignmentStrategy.Source.SourceName}");
-            var nestedDtoType = sourceIsDto ? assignmentStrategy.Source.SourceType : assignmentStrategy.Destination.DestinationType;
-            var nestedModelType = sourceIsDto ? assignmentStrategy.Destination.DestinationType : assignmentStrategy.Source.SourceType;
+            Debug.Assert(assignmentStrategy.Source != null, "assignmentStrategy.Source != null");
+            this.diagnosticLogger($"Nested object graph detected on model property: {parentType.Name}.{assignmentStrategy.Source?.SourceName}");
+            var nestedDtoType = sourceIsDto ? assignmentStrategy.Source?.SourceType : assignmentStrategy.Destination?.DestinationType;
+            var nestedModelType = sourceIsDto ? assignmentStrategy.Destination?.DestinationType : assignmentStrategy?.Source?.SourceType;
+            Debug.Assert(nestedDtoType != null, "nestedDtoType != null");
+            Debug.Assert(nestedModelType != null, "nestedModelType != null");
             var dependentMapper = AllMaps.GetOrAdd(
                 MapResult.GetMapperName(nestedDtoType, nestedModelType),
                 key =>
