@@ -24,7 +24,7 @@ namespace Rees.TangyFruitMapper.UnitTest
 
         protected string Act()
         {
-            bool codeOutputed = false, errors = false;
+            bool codeOutputed = false;
             var code = new StringBuilder();
             this.Subject.Generate(
                 c =>
@@ -38,7 +38,6 @@ namespace Rees.TangyFruitMapper.UnitTest
             this.DiagnosticMessages.ForEach(this.Output.WriteLine);
 
             Assert.True(codeOutputed);
-            Assert.False(errors);
 
             return code.ToString();
         }
