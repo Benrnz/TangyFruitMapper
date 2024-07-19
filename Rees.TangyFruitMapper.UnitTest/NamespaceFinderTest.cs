@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Rees.TangyFruitMapper.UnitTest.TestData;
+﻿using Rees.TangyFruitMapper.UnitTest.TestData;
 using Xunit;
 using Xunit.Abstractions;
 

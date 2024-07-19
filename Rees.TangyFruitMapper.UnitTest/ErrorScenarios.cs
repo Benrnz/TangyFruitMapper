@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Text;
 using Rees.TangyFruitMapper.UnitTest.TestData;
 using Rees.TangyFruitMapper.Validation;
@@ -68,14 +66,14 @@ namespace Rees.TangyFruitMapper.UnitTest
             var codeOutput = new Action<string>(s => code.AppendLine(s));
             Act<DtoType1, IgnoreNonwriteableProperties>(codeOutput);
             this.output.WriteLine(code.ToString());
-            Assert.False(code.ToString().Contains("WeirdCalculation"));
+            Assert.DoesNotContain("WeirdCalculation", code.ToString());
         }
 
         private static void Act<TDto, TModel>(Action<string> codeOutput = null)
         {
-            var subject = new MappingGenerator();
+            var subject = new MappingGenerator<TDto, TModel>();
             var codeWritter = codeOutput ?? (s => { });
-            subject.Generate<TDto, TModel>(codeWritter);
+            subject.Generate(codeWritter);
         }
 
         public class IgnoreNonwriteableProperties

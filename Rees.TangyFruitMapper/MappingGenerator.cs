@@ -6,20 +6,18 @@ namespace Rees.TangyFruitMapper
     ///     A Convention based C# code generator for mapping a model object to a DTO object and back.
     ///     This class is designed to be used either with T4, console application, or a unit test.
     /// </summary>
-    public class MappingGenerator
+    public class MappingGenerator<TDto, TModel>
     {
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         private Action<string> codeOutputDelegate;
         private NamespaceFinder namespaceFinder;
         private Type dtoType;
         private Type modelType;
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         private int indent;
 
         /// <summary>
         ///     An optional delegate to a logging action to output diagnostic messages for debugging and troubleshooting purposes.
         /// </summary>
-        public required Action<string> DiagnosticLogging { get; set; }
+        public Action<string> DiagnosticLogging { get; set; } = x => { };
 
         /// <summary>
         ///     Gets or sets a value indicating whether generated code will be emitted as internal classes.
@@ -31,6 +29,14 @@ namespace Rees.TangyFruitMapper
         /// </summary>
         public string Namespace { get; set; } = "GeneratedCode";
 
+        public MappingGenerator()
+        {
+            this.codeOutputDelegate = Console.WriteLine;
+            this.dtoType = typeof(TDto);
+            this.modelType = typeof(TModel);
+            this.namespaceFinder = new NamespaceFinder(this.dtoType, this.modelType);
+        }
+
         /// <summary>
         ///     Generates the code for the specified types. Be sure to check for TODO's in the generated code.
         /// </summary>
@@ -39,15 +45,11 @@ namespace Rees.TangyFruitMapper
         /// <param name="codeOutputDelegate">An action to output the code.</param>
         /// <exception cref="ArgumentNullException">
         /// </exception>
-        public void Generate<TDto, TModel>([NotNull] Action<string> codeOutputDelegate)
+        public void Generate([NotNull] Action<string> codeOutputDelegate)
         {
             if (codeOutputDelegate == null) throw new ArgumentNullException(nameof(codeOutputDelegate));
-            if (DiagnosticLogging == null) DiagnosticLogging = x => { };
 
             this.codeOutputDelegate = codeOutputDelegate;
-            this.modelType = typeof(TModel);
-            this.dtoType = typeof(TDto);
-            this.namespaceFinder = new NamespaceFinder(this.dtoType, this.modelType);
             DiagnosticLogging($"Starting to generate code for mapping {this.dtoType.Name} to {this.modelType.Name}...");
 
             MapByProperties.ClearMapCache();

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -9,13 +8,13 @@ namespace Rees.TangyFruitMapper.UnitTest
     {
         protected readonly List<string> DiagnosticMessages = new List<string>();
         protected readonly ITestOutputHelper Output;
-        protected readonly MappingGenerator Subject;
+        protected readonly MappingGenerator<TDto, TModel> Subject;
         protected readonly string GeneratedCode;
 
         protected MappingGeneratorScenarios(ITestOutputHelper output)
         {
             this.Output = output;
-            this.Subject = new MappingGenerator
+            this.Subject = new MappingGenerator<TDto, TModel>()
             {
                 DiagnosticLogging = l => this.DiagnosticMessages.Add(l)
             };
@@ -27,7 +26,7 @@ namespace Rees.TangyFruitMapper.UnitTest
         {
             bool codeOutputed = false, errors = false;
             var code = new StringBuilder();
-            this.Subject.Generate<TDto, TModel>(
+            this.Subject.Generate(
                 c =>
                 {
                     codeOutputed = true;
