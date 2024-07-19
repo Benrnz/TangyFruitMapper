@@ -31,6 +31,7 @@ namespace Rees.TangyFruitMapper.UnitTest
                     Basic.Reference.Assemblies.Net80.References.SystemRuntime,
                     Basic.Reference.Assemblies.Net80.References.SystemLinq,
                     Basic.Reference.Assemblies.Net80.References.SystemConsole,
+                    Basic.Reference.Assemblies.Net80.References.SystemCollections,
                     MetadataReference.CreateFromFile(runningFolder),  // Complete path to this unit test library.
                     MetadataReference.CreateFromFile($"{Path.GetDirectoryName(runningFolder)}\\Rees.TangyFruitMapper.dll"), 
                 // Add other necessary references here
