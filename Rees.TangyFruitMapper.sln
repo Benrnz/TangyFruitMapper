@@ -1,11 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35027.167
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rees.TangyFruitMapper", "Rees.TangyFruitMapper\Rees.TangyFruitMapper.csproj", "{AAF315D4-ED07-44B3-AA75-9725E618D5C7}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rees.TangyFruitMapper.UnitTest", "Rees.TangyFruitMapper.UnitTest\Rees.TangyFruitMapper.UnitTest.csproj", "{DC86FDDC-4B3C-4C90-9F3C-AFC0C2E06BB4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rees.TangyFruitMapper", "Rees.TangyFruitMapper/Rees.TangyFruitMapper.csproj", "{F88955E4-B8B5-4DE6-B422-282631A47311}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,16 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{AAF315D4-ED07-44B3-AA75-9725E618D5C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AAF315D4-ED07-44B3-AA75-9725E618D5C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AAF315D4-ED07-44B3-AA75-9725E618D5C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AAF315D4-ED07-44B3-AA75-9725E618D5C7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DC86FDDC-4B3C-4C90-9F3C-AFC0C2E06BB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DC86FDDC-4B3C-4C90-9F3C-AFC0C2E06BB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DC86FDDC-4B3C-4C90-9F3C-AFC0C2E06BB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DC86FDDC-4B3C-4C90-9F3C-AFC0C2E06BB4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F88955E4-B8B5-4DE6-B422-282631A47311}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F88955E4-B8B5-4DE6-B422-282631A47311}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F88955E4-B8B5-4DE6-B422-282631A47311}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F88955E4-B8B5-4DE6-B422-282631A47311}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7ED76566-03F8-47D6-B146-B8AEA4D2349D}
 	EndGlobalSection
 EndGlobal

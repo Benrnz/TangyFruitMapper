@@ -2,14 +2,14 @@
 {
     internal class CommentedAssignment : AssignDestinationStrategy
     {
-        private readonly string reason;
+        private readonly string? reason;
 
-        public CommentedAssignment(string assignmentDestinationName) : base(null)
+        public CommentedAssignment(string? assignmentDestinationName) : base(null)
         {
             AssignmentDestinationName = assignmentDestinationName;
         }
 
-        public CommentedAssignment(string assignmentDestinationName, string reason) : base(null)
+        public CommentedAssignment(string? assignmentDestinationName, string reason) : base(null)
         {
             this.reason = reason;
             AssignmentDestinationName = assignmentDestinationName;

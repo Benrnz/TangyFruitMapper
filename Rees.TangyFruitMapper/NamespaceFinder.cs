@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Reflection;
-using JetBrains.Annotations;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Rees.TangyFruitMapper
 {
@@ -31,6 +28,7 @@ namespace Rees.TangyFruitMapper
 
         private void DiscoverAllNamespaces(ConcurrentDictionary<string, string> namespaces, Type type)
         {
+            if (type.Namespace == null) return;
             namespaces.GetOrAdd(type.Namespace, key => type.Name);
 
             if (!this.visitedTypes.Contains(type))
