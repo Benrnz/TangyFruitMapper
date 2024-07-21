@@ -18,6 +18,7 @@ Its a convention based and old school 'solve it with plain code' approach to map
     <RepositoryUrl>https://github.com/Benrnz/TangyFruitMapper</RepositoryUrl>
     <PackageTags>DTO;Mapping;Mapper</PackageTags>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
